@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch LoginApp",
+            "request": "launch",
+            "mainClass": "LoginApp",
+            "classPaths": [
+                "lib/mysql-connector-j-9.0.0.jar" // Update with your connector version
+            ]
+        }
+    ]
+}

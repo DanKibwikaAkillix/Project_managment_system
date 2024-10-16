@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.mindrot:jbcrypt:0.4'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17) // Use Java 17 or your preferred version
+    }
+}
