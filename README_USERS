@@ -1,0 +1,219 @@
+-- Create Database and Use it
+CREATE DATABASE IF NOT EXISTS CLOUD_BASE_PROJECT_MANAGEMENT_SYSTEM;
+USE CLOUD_BASE_PROJECT_MANAGEMENT_SYSTEM;
+
+-- Create Users Table
+CREATE TABLE IF NOT EXISTS users (
+    userID INT AUTO_INCREMENT PRIMARY KEY,
+    userName VARCHAR(50) NOT NULL,
+    emailAddress VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    roleName ENUM('Creator', 'Participant') NOT NULL,
+    roleDescription VARCHAR(255),
+    accountStatus ENUM('active', 'inactive') DEFAULT 'active',
+    firstName VARCHAR(50),
+    lastName VARCHAR(50)
+);
+
+-- Procedure to Add a User
+DELIMITER //
+
+CREATE PROCEDURE addUser(
+    IN p_userName VARCHAR(50),
+    IN p_emailAddress VARCHAR(100),
+    IN p_password VARCHAR(255),
+    IN p_roleName ENUM('Creator', 'Participant'),
+    IN p_roleDescription VARCHAR(255),
+    IN p_firstName VARCHAR(50),
+    IN p_lastName VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Could not add user.';
+    END;
+
+    START TRANSACTION;
+    INSERT INTO users (
+        userName, emailAddress, password, roleName, 
+        roleDescription, firstName, lastName
+    ) 
+    VALUES (
+        p_userName, p_emailAddress, p_password, 
+        p_roleName, p_roleDescription, p_firstName, p_lastName
+    );
+    COMMIT;
+END //
+
+DELIMITER ;
+
+-- Procedure to Update a User
+DELIMITER //
+
+CREATE PROCEDURE updateUser(
+    IN p_userID INT,
+    IN p_emailAddress VARCHAR(100),
+    IN p_password VARCHAR(255),
+    IN p_roleName ENUM('Creator', 'Participant'),
+    IN p_accountStatus ENUM('active', 'inactive')
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Could not update user.';
+    END;
+
+    START TRANSACTION;
+    UPDATE users 
+    SET 
+        emailAddress = p_emailAddress, 
+        password = p_password, 
+        roleName = p_roleName, 
+        accountStatus = p_accountStatus
+    WHERE userID = p_userID;
+    COMMIT;
+END //
+
+DELIMITER ;
+
+-- Procedure to Delete a User
+DELIMITER //
+
+CREATE PROCEDURE deleteUser(IN p_userID INT)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Could not delete user.';
+    END;
+
+    START TRANSACTION;
+    DELETE FROM users WHERE userID = p_userID;
+    COMMIT;
+END //
+
+DELIMITER ;
+
+-- Procedure to Get User by Email
+DELIMITER //
+
+CREATE PROCEDURE getUserByEmail(IN p_emailAddress VARCHAR(100))
+BEGIN
+    SELECT * FROM users WHERE emailAddress = p_emailAddress;
+END //
+
+DELIMITER ;
+
+ projectID
+ projectName
+ projectDescription
+ startDate
+ endDate
+ projectStatus
+ 
+ designID
+ assetName
+ assetType
+ filePath
+ uploadDate
+ uploadedB
+
+ findingID
+ findingName
+ findingType
+ description
+ filePath
+ uploadedBy
+ uploadDate
+
+  notificationID
+ userID
+ projectID
+ timeStamp
+ messag
+
+ fileID
+ fileName
+ action
+ fileType
+
+
+ -- File tables
+
+ -- Create the Projects table
+CREATE TABLE IF NOT EXISTS Projects (
+    projectID INT AUTO_INCREMENT PRIMARY KEY,
+    projectName VARCHAR(255) NOT NULL,
+    projectDescription TEXT,
+    startDate DATE,
+    endDate DATE,
+    projectStatus VARCHAR(50)
+);
+
+-- Create the Assets table
+CREATE TABLE IF NOT EXISTS Assets (
+    designID INT AUTO_INCREMENT PRIMARY KEY,
+    assetName VARCHAR(255) NOT NULL,
+    assetType VARCHAR(100),
+    filePath VARCHAR(255),
+    uploadDate DATETIME,
+    uploadedBy VARCHAR(255)
+);
+
+-- Create the Findings table
+CREATE TABLE IF NOT EXISTS Findings (
+    findingID INT AUTO_INCREMENT PRIMARY KEY,
+    findingName VARCHAR(255) NOT NULL,
+    findingType VARCHAR(100),
+    description TEXT,
+    filePath VARCHAR(255),
+    uploadedBy VARCHAR(255),
+    uploadDate DATETIME
+);
+
+-- Create the Notifications table
+CREATE TABLE IF NOT EXISTS Notifications (
+    notificationID INT AUTO_INCREMENT PRIMARY KEY,
+    userID INT,
+    projectID INT,
+    timeStamp DATETIME,
+    message TEXT,
+    FOREIGN KEY (projectID) REFERENCES Projects(projectID)
+    -- Assuming userID will reference a Users table which should be created separately
+);
+
+-- Create the Files table
+CREATE TABLE IF NOT EXISTS Files (
+    fileID INT AUTO_INCREMENT PRIMARY KEY,
+    fileName VARCHAR(255) NOT NULL,
+    action VARCHAR(100),
+    fileType VARCHAR(100)
+);
+
+
+-- PROCEDURES
+
+-- Procedure to delete a file
+DELIMITER //
+CREATE PROCEDURE DeleteFile(
+    IN p_fileID INT
+)
+BEGIN
+    DELETE FROM Files WHERE fileID = p_fileID;
+    SELECT 'File deleted successfully!' AS message;
+END //
+DELIMITER ;
+
+-- Trigger for after deleting a file
+DELIMITER //
+CREATE TRIGGER after_delete_file
+AFTER DELETE ON Files
+FOR EACH ROW
+BEGIN
+    INSERT INTO Notifications (userID, projectID, timeStamp, message)
+    VALUES (1, NULL, NOW(), CONCAT('File "', OLD.fileName, '" deleted.'));
+END //
+DELIMITER ;
+

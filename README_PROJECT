@@ -1,0 +1,47 @@
+DELIMITER //
+CREATE PROCEDURE updateProject(
+    IN projectID INT,
+    IN projectName VARCHAR(255),
+    IN projectDescription TEXT,
+    IN startDate DATE,
+    IN endDate DATE,
+    IN projectStatus VARCHAR(20)
+)
+BEGIN
+    UPDATE projects
+    SET projectName = projectName,
+        projectDescription = projectDescription,
+        startDate = startDate,
+        endDate = endDate,
+        projectStatus = projectStatus
+    WHERE projectID = projectID;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE deleteProject(IN projectID INT)
+BEGIN
+    DELETE FROM projects WHERE projectID = projectID;
+END //
+DELIMITER ;
+
+
+
+DELIMITER //
+CREATE PROCEDURE addProject(
+    IN projectName VARCHAR(255),
+    IN projectDescription TEXT,
+    IN startDate DATE,
+    IN endDate DATE,
+    IN projectStatus VARCHAR(20),
+    IN userEmail VARCHAR(255)
+)
+BEGIN
+    INSERT INTO projects (projectName, projectDescription, startDate, endDate, projectStatus, createdBy)
+    VALUES (projectName, projectDescription, startDate, endDate, projectStatus, userEmail);
+END //
+DELIMITER ;
+
+
+
